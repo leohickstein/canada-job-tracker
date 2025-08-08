@@ -32,16 +32,19 @@ jobs:
           git add website/data/jobs.json
           git commit -m "chore: refresh jobs data" || echo "No changes"
           git push
+      # - name: Send email digest (optional)
+      #   if: ${{ env.SMTP_SERVER != '' }}
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: ${{ env.SMTP_SERVER }}
+      #     server_port: ${{ env.SMTP_PORT }}
+      #     username: ${{ env.SMTP_USERNAME }}
+      #     password: ${{ env.SMTP_PASSWORD }}
+      #     subject: "Daily Jobs Digest"
+      #     to: ${{ env.EMAIL_TO }}
+      #     from: "Jobs Tracker <${{ env.SMTP_USERNAME }}>"
+      #     content_type: text/html
+      #     html_body: "<h3>Novas vagas publicadas hoje</h3><p>Confere no site.</p>"
       - name: Send email digest (optional)
         if: ${{ env.SMTP_SERVER != '' }}
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ env.SMTP_SERVER }}
-          server_port: ${{ env.SMTP_PORT }}
-          username: ${{ env.SMTP_USERNAME }}
-          password: ${{ env.SMTP_PASSWORD }}
-          subject: "Daily Jobs Digest"
-          to: ${{ env.EMAIL_TO }}
-          from: "Jobs Tracker <${{ env.SMTP_USERNAME }}>"
-          content_type: text/html
-          html_body: "<h3>Novas vagas publicadas hoje</h3><p>Confere no site.</p>"
+        run: node scripts/send_email.js
