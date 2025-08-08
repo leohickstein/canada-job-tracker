@@ -1,0 +1,41 @@
+name: Daily Data Refresh
+on:
+  schedule:
+    - cron: "20 16 * * *"   # 09:20 America/Vancouver
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+      - name: Commit website/data/jobs.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add website/data/jobs.json
+          git commit -m "chore: refresh jobs data" || echo "No changes"
+          git push
+      - name: (Optional) Send email digest
+        if: ${{ success() && secrets.SMTP_SERVER != '' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Daily Jobs Digest"
+          to: ${{ secrets.EMAIL_TO }}
+          from: "Jobs Tracker <no-reply@yourdomain.com>"
+          content_type: text/html
+          html_body: |
+            <h3>Daily Jobs Digest</h3>
+            <p>New data generated. Visit your website to view the latest postings.</p>

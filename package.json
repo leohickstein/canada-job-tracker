@@ -1,0 +1,16 @@
+{
+  "name": "canada-jobs-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/fetch_and_build.js",
+    "serve": "python3 -m http.server -d website 8080",
+    "start": "npm run build && npm run serve",
+    "test": "node scripts/self_test.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2"
+  }
+}

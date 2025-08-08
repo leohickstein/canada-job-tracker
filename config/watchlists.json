@@ -1,0 +1,54 @@
+{
+  "watchlists": [
+    {
+      "name": "HR Coordinator",
+      "synonyms": [
+        "HR Coordinator",
+        "Human Resources Coordinator",
+        "People & Culture Coordinator",
+        "People Operations Coordinator"
+      ]
+    },
+    {
+      "name": "Talent Acquisition",
+      "synonyms": [
+        "Talent Acquisition",
+        "TA Specialist",
+        "Recruiter",
+        "Talent Sourcer",
+        "Talent Acquisition Coordinator",
+        "Talent Acquisition Specialist"
+      ]
+    },
+    {
+      "name": "Administrative Assistant",
+      "synonyms": [
+        "Administrative Assistant",
+        "Admin Assistant",
+        "Office Administrator",
+        "Office Assistant"
+      ]
+    },
+    {
+      "name": "Receptionist",
+      "synonyms": [
+        "Receptionist",
+        "Front Desk",
+        "Front Desk Associate",
+        "Office Receptionist"
+      ]
+    }
+  ],
+  "regions": [
+    {
+      "name": "Remote-Canada",
+      "type": "remote",
+      "where": "Canada"
+    },
+    {
+      "name": "British Columbia",
+      "type": "onsite",
+      "where": "British Columbia"
+    }
+  ]
+}
