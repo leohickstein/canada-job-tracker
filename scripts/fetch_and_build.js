@@ -27,7 +27,7 @@ function normalizeJob({ source, raw, roleMatched, region }) {
   const salaryMax = raw.salary_max || raw.salaryMax || null;
 
   return {
-    id: `${source}:${raw.id ?? Buffer.from((url || title).slice(0, 128)).toString('base64')}`,
+    id: `${source}:${raw.id ?? Buffer.from((url||title).slice(0,128)).toString('base64')}`,
     source,
     title,
     company,
@@ -55,17 +55,17 @@ function looksRemote(text) {
 }
 
 // Fetch from Adzuna for a given synonym & region (with retries)
-async function adzunaFetch({ synonym, region, page = 1, results_per_page = 50 }) {
+async function adzunaFetch({ synonym, region, page=1, results_per_page = 50 }) {
   if (!ADZUNA_APP_ID || !ADZUNA_APP_KEY) return [];
   const encodedSyn = encodeURIComponent(synonym);
   const encodedWhere = encodeURIComponent(region.where);
   const url = `https://api.adzuna.com/v1/api/jobs/ca/search/${page}?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=${results_per_page}&what=${encodedSyn}&where=${encodedWhere}&content-type=application/json`;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt=1; attempt<=3; attempt++) {
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Adzuna HTTP ${res.status}`);
       const data = await res.json();
-      return data.results?.map(r => normalizeJob({ source: 'adzuna', raw: r, roleMatched: synonym, region })) ?? [];
+      return data.results?.map(r => normalizeJob({ source:'adzuna', raw:r, roleMatched: synonym, region })) ?? [];
     } catch (err) {
       if (attempt === 3) {
         console.error('Adzuna fetch failed:', err.message);
@@ -80,16 +80,13 @@ async function adzunaFetch({ synonym, region, page = 1, results_per_page = 50 })
 // Placeholder WorkBC fetcher (skipped if no base URL/key)
 async function workbcFetch({ synonym, region }) {
   if (!WORKBC_BASE_URL || !WORKBC_API_KEY) return [];
-  // This is a placeholder; you need to adapt to the actual WorkBC API spec & params.
-  // Example GET: `${WORKBC_BASE_URL}/jobs?query=${encodeURIComponent(synonym)}&region=${encodeURIComponent(region.where)}`
-  // with header 'apikey: WORKBC_API_KEY'
   try {
     const url = `${WORKBC_BASE_URL}`; // TODO: set to actual endpoint
-    const res = await fetch(url, { headers: { 'apikey': WORKBC_API_KEY } });
+    const res = await fetch(url, { headers: { 'apikey': WORKBC_API_KEY }});
     if (!res.ok) throw new Error(`WorkBC HTTP ${res.status}`);
     const data = await res.json();
     const items = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
-    return items.map(item => normalizeJob({ source: 'workbc', raw: item, roleMatched: synonym, region }));
+    return items.map(item => normalizeJob({ source:'workbc', raw:item, roleMatched: synonym, region }));
   } catch (err) {
     console.error('WorkBC fetch failed:', err.message);
     return [];
@@ -117,7 +114,7 @@ async function main() {
         // Basic dedupe by (title+company+region)
         const seen = new Set();
         combined.forEach(j => {
-          const key = (j.title || '') + '|' + (j.company || '') + '|' + (j.region || '');
+          const key = (j.title||'') + '|' + (j.company||'') + '|' + (j.region||'');
           if (!seen.has(key)) {
             seen.add(key);
             all.push(j);
@@ -131,11 +128,11 @@ async function main() {
   }
 
   // Sort by created desc when available, else by title
-  all.sort((a, b) => {
+  all.sort((a,b) => {
     const da = a.created ? Date.parse(a.created) : 0;
     const db = b.created ? Date.parse(b.created) : 0;
     if (db !== da) return db - da;
-    return (a.title || '').localeCompare(b.title || '');
+    return (a.title||'').localeCompare(b.title||'');
   });
 
   // === Persist "first_seen_at" so the UI can mark NEW postings ===
@@ -148,7 +145,9 @@ async function main() {
     (old.jobs || []).forEach(j => {
       if (j.id) prev[j.id] = j.first_seen_at || old.generated_at;
     });
-  } catch (_) { }
+  } catch (e) {
+    // no previous file, ignore
+  }
 
   const nowIso = new Date().toISOString();
   all.forEach(j => {

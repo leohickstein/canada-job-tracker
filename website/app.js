@@ -122,7 +122,7 @@ async function load() {
   }
 
   exportCsv.addEventListener('click', () => {
-    const rows = [['id','title','company','location','created','status','appliedAt','notes','url']]];
+    const rows = [['id','title','company','location','created','status','appliedAt','notes','url']];
     all.forEach(j => {
       const s = store[j.id] || {};
       if (s.status) rows.push([j.id, j.title||'', j.company||'', j.location||'', j.created||'', s.status||'', s.appliedAt||'', (s.notes||'').replace(/\n/g,' '), j.url||'']);
@@ -138,4 +138,5 @@ async function load() {
   [q, regionFilter, roleFilter, onlyNew, hideApplied, sortBy].forEach(el => el.addEventListener('input', applyFilters));
   render(all);
 }
+
 load();
