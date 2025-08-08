@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Canada Job Roles Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Canada Job Roles Tracker</h1>
+    <p>Watchlists: HR Coordinator · Talent Acquisition · Administrative Assistant · Receptionist | Regions: Remote-Canada, British Columbia</p>
+  </header>
+
+  <section class="filters">
+    <input id="q" placeholder="Search title/company/city..." />
+    <select id="regionFilter">
+      <option value="">All regions</option>
+    </select>
+    <select id="roleFilter">
+      <option value="">All roles</option>
+    </select>
+  </section>
+
+  <main id="results"></main>
+
+  <footer>
+    <small>Data refreshed daily via Adzuna API and (optionally) WorkBC API. This site is for demonstration only.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
