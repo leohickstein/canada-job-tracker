@@ -1,0 +1,5 @@
+import { useEffect, useState } from 'react'
+type Theme = 'light' | 'dark' | 'system'
+const KEY = 'jobtracker:theme'
+const sys = () => (typeof window === 'undefined' || !window.matchMedia) ? 'light' : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+export function useTheme(){ const [theme, setTheme] = useState<Theme>(() => { try { return (localStorage.getItem(KEY) as Theme) || 'system' } catch { return 'system' } }); const [system, setSystem] = useState<'light'|'dark'>(sys()); useEffect(()=>{ const m = window.matchMedia('(prefers-color-scheme: dark)'); const fn = () => setSystem(sys()); try{ m.addEventListener('change', fn) }catch{ m.addListener(fn as any) } return ()=>{ try{ m.removeEventListener('change', fn) }catch{ m.removeListener(fn as any) } } },[]); useEffect(()=>{ try{ localStorage.setItem(KEY, theme) }catch{} },[theme]); const effective = theme==='system'? system: theme; useEffect(()=>{ const root = document.documentElement; root.classList.toggle('dark', effective==='dark'); (root.style as any).colorScheme = effective },[effective]); return { theme, setTheme, effective } as const }

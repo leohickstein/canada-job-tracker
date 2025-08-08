@@ -1,0 +1,40 @@
+# --- Node / package managers ---
+**/node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# keep your lockfile for reproducible builds:
+# !package-lock.json
+# !pnpm-lock.yaml
+# !yarn.lock
+
+# --- Build / caches ---
+**/dist/
+**/.vite/
+**/.cache/
+coverage/
+.eslintcache
+
+# --- Env / secrets ---
+.env
+.env.*.local
+
+# --- OS / editors ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Generated job data (published by Actions, not committed) ---
+# keep the folder but ignore the JSON so Actions can write it
+website/data/*
+!website/data/.gitkeep
+
+# Local dev JSON (if you keep a copy there)
+website-react/public/data/*
+!website-react/public/data/.gitkeep
+
+# --- Misc dumps ---
+*.zip
+*.patch

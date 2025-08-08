@@ -1,0 +1,1 @@
+export function dataUrl(path='data/jobs.json'){ const env: any = (import.meta as any).env || {}; const custom = env.VITE_JOBS_URL; if (custom) return custom; const base = env.BASE_URL || '/'; return base + path }
