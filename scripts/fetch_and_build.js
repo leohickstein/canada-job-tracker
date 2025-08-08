@@ -138,14 +138,16 @@ async function main() {
     return (a.title || '').localeCompare(b.title || '');
   });
 
-  // Output to website/data/jobs.json
+  // === Persist "first_seen_at" so the UI can mark NEW postings ===
   const outDir = 'website/data';
   fs.mkdirSync(outDir, { recursive: true });
 
   let prev = {};
   try {
     const old = JSON.parse(fs.readFileSync(path.join(outDir, 'jobs.json'), 'utf-8'));
-    (old.jobs || []).forEach(j => { if (j.id) prev[j.id] = j.first_seen_at || old.generated_at; });
+    (old.jobs || []).forEach(j => {
+      if (j.id) prev[j.id] = j.first_seen_at || old.generated_at;
+    });
   } catch (_) { }
 
   const nowIso = new Date().toISOString();
@@ -154,8 +156,9 @@ async function main() {
     j.last_seen_at = nowIso;
   });
 
+  // Output to website/data/jobs.json
   fs.writeFileSync(path.join(outDir, 'jobs.json'), JSON.stringify({
-    generated_at: new Date().toISOString(),
+    generated_at: nowIso,
     total: all.length,
     jobs: all,
   }, null, 2));

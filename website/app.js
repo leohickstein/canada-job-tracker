@@ -12,17 +12,17 @@ async function load() {
 
   const all = payload.jobs || [];
   const now = Date.now();
-  const NEW_MS = 36 * 60 * 60 * 1000; // janela "new"
+  const NEW_MS = 36 * 60 * 60 * 1000; // 36h window
 
-  // storage helpers
+  // localStorage for status/notes/clicks
   const STORAGE_KEY = 'jobTracker:v1';
   const store = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
   function saveStore() { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); }
 
-  // deduz "new"
+  // mark "new"
   all.forEach(j => j._isNew = j.first_seen_at ? (now - Date.parse(j.first_seen_at) <= NEW_MS) : false);
 
-  // filtros dinâmicos
+  // populate filters
   const regions = [...new Set(all.map(j => j.region).filter(Boolean))];
   regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; regionFilter.appendChild(opt); });
   const roles = [...new Set(all.map(j => j.roleMatched).filter(Boolean))];
@@ -33,7 +33,6 @@ async function load() {
     list.forEach(j => {
       const status = store[j.id]?.status || '';
       const notes = store[j.id]?.notes || '';
-      const isApplied = ['applied','interview','offer','rejected'].includes(status);
 
       const card = document.createElement('div');
       card.className = 'card';
@@ -49,7 +48,7 @@ async function load() {
           <span class="badge">${j.region || ''}</span>
           <span class="badge">${j.roleMatched || ''}</span>
         </div>
-        <div class="status" style="margin-top:8px;">
+        <div class="status">
           <label>Status:
             <select data-id="${j.id}" class="statusSel">
               <option value="">—</option>
@@ -66,7 +65,7 @@ async function load() {
       `;
       elResults.appendChild(card);
 
-      // track click (marca clickedAt)
+      // track click
       card.querySelector('.view').addEventListener('click', () => {
         store[j.id] = store[j.id] || {};
         store[j.id].clickedAt = new Date().toISOString();
@@ -74,7 +73,7 @@ async function load() {
       });
     });
 
-    // listeners de status/notes
+    // listeners
     document.querySelectorAll('.statusSel').forEach(sel => {
       sel.addEventListener('change', e => {
         const id = e.target.getAttribute('data-id');
@@ -82,7 +81,7 @@ async function load() {
         store[id].status = e.target.value;
         if (e.target.value === 'applied' && !store[id].appliedAt) store[id].appliedAt = new Date().toISOString();
         saveStore();
-        applyFilters(); // re-filtra se "Hide applied" ativo
+        applyFilters();
       });
     });
     document.querySelectorAll('.notes').forEach(t => {
@@ -109,7 +108,7 @@ async function load() {
       const matchesRole = !role || j.roleMatched === role;
       const matchesNew = !onlyN || j._isNew;
       const st = store[j.id]?.status || '';
-      const matchesApplied = !hideA || (st === '' || st === 'rejected'); // esconde applied/interview/offer
+      const matchesApplied = !hideA || (st === '' || st === 'rejected');
       return matchesText && matchesRegion && matchesRole && matchesNew && matchesApplied;
     });
 
@@ -122,9 +121,8 @@ async function load() {
     render(filtered);
   }
 
-  // export CSV
   exportCsv.addEventListener('click', () => {
-    const rows = [['id','title','company','location','created','status','appliedAt','notes','url']];
+    const rows = [['id','title','company','location','created','status','appliedAt','notes','url']]];
     all.forEach(j => {
       const s = store[j.id] || {};
       if (s.status) rows.push([j.id, j.title||'', j.company||'', j.location||'', j.created||'', s.status||'', s.appliedAt||'', (s.notes||'').replace(/\n/g,' '), j.url||'']);
