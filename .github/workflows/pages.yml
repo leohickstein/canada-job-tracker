@@ -1,7 +1,7 @@
 name: Deploy website to Pages
 on:
   push:
-    branches: [main]   # troque p/ master se for teu padrão
+    branches: [main]          # troque para master se for teu padrão
     paths:
       - 'website/**'
   workflow_dispatch:

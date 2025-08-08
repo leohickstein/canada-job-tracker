@@ -1,15 +1,18 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Canada Job Roles Tracker</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <header>
     <h1>Canada Job Roles Tracker</h1>
-    <p>Watchlists: HR Coordinator · Talent Acquisition · Administrative Assistant · Receptionist | Regions: Remote-Canada, British Columbia</p>
+    <p>Watchlists: HR Coordinator · Talent Acquisition · Administrative Assistant · Receptionist | Regions:
+      Remote-Canada, British Columbia</p>
   </header>
 
   <section class="filters">
@@ -20,6 +23,18 @@
     <select id="roleFilter">
       <option value="">All roles</option>
     </select>
+    <label style="display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="onlyNew"> Only new
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="hideApplied"> Hide applied
+    </label>
+    <select id="sortBy">
+      <option value="newest">Newest</option>
+      <option value="oldest">Oldest</option>
+    </select>
+    <button id="exportCsv">Export applied CSV</button>
+
   </section>
 
   <main id="results"></main>
@@ -30,4 +45,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>

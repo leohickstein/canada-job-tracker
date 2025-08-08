@@ -9,3 +9,9 @@ h1 { margin: 0; font-size: 20px; }
 .card h3 { margin:0 0 6px; font-size:16px; }
 .meta { font-size:12px; opacity:.8; margin-bottom: 8px; }
 a.btn { display:inline-block; padding:8px 10px; border-radius:8px; border:1px solid #334155; text-decoration:none; color:#e6e8ee; }
+
+.badge { display:inline-block; font-size:11px; padding:2px 6px; border-radius:999px; border:1px solid #334155; margin-left:6px; }
+.badge.new { border-color:#22c55e; }
+.status { font-size:12px; opacity:.85; }
+.status select, .status textarea { width:100%; background:#0b1220; color:#e6e8ee; border:1px solid #334155; border-radius:8px; padding:6px; }
+
