@@ -1,22 +1,30 @@
 name: Daily Data Refresh
 on:
   schedule:
-    - cron: "20 16 * * *"   # 09:20 America/Vancouver
+    - cron: "20 16 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write  # precisa pra commitar o jobs.json
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+      ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+      SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
+      - run: npm install
       - run: npm run build
-        env:
-          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
-          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
       - name: Commit website/data/jobs.json
         run: |
           git config user.name "github-actions"
@@ -24,18 +32,16 @@ jobs:
           git add website/data/jobs.json
           git commit -m "chore: refresh jobs data" || echo "No changes"
           git push
-      - name: (Optional) Send email digest
-        if: ${{ success() && secrets.SMTP_SERVER != '' }}
+      - name: Send email digest (optional)
+        if: ${{ env.SMTP_SERVER != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
+          server_address: ${{ env.SMTP_SERVER }}
+          server_port: ${{ env.SMTP_PORT }}
+          username: ${{ env.SMTP_USERNAME }}
+          password: ${{ env.SMTP_PASSWORD }}
           subject: "Daily Jobs Digest"
-          to: ${{ secrets.EMAIL_TO }}
-          from: "Jobs Tracker <no-reply@yourdomain.com>"
+          to: ${{ env.EMAIL_TO }}
+          from: "Jobs Tracker <${{ env.SMTP_USERNAME }}>"
           content_type: text/html
-          html_body: |
-            <h3>Daily Jobs Digest</h3>
-            <p>New data generated. Visit your website to view the latest postings.</p>
+          html_body: "<h3>Novas vagas publicadas hoje</h3><p>Confere no site.</p>"
