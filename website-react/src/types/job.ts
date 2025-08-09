@@ -22,5 +22,5 @@ export type Persist = {
   /** when true, card appears on the Tracker board */
   tracked?: boolean;
 }
-export type ColumnKey = 'backlog' | 'applied' | 'interview' | 'offer' | 'rejected'
+export type ColumnKey = 'backlog' | 'applied' | 'interview' | 'offer' | 'rejected' | 'saved'
 export type PersistState = { items: Record<string, Persist>; boardOrder: Record<ColumnKey, string[]>; version: number }

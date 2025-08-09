@@ -42,7 +42,7 @@ export function TrackerBoard({ jobs, state, onMove, onReorder, q='', hideDone=fa
 
   const lists = useMemo(() => {
     const byId = new Map(visibleJobs.map(j => [j.id, j]))
-    const result: Record<ColumnKey, string[]> = { backlog: [], applied: [], interview: [], offer: [], rejected: [] }
+    const result: Record<ColumnKey, string[]> = { backlog: [], applied: [], interview: [], offer: [], rejected: [], saved: [] }
 
     // Seed from saved order (ignore unknown columns safely)
     ;(Object.keys(state.boardOrder || {}) as Array<keyof typeof state.boardOrder>).forEach((k) => {

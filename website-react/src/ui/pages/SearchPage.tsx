@@ -1,11 +1,10 @@
 // SearchPage.tsx
-import React, { useMemo, useState, useEffect, useTransition } from 'react'
 import type { Job, PersistState } from '@/types/job'
 import { JobCard } from '@/ui/components/JobCard'
-import { FiltersPanel } from './FiltersPanel'
-import { ResultsBar } from '@/ui/components/ResultsBar'
 import { regionOf, roleOf, text } from '@/utils/text'
-import { Search, Sliders, Loader2 } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
+import { FiltersPanel } from './FiltersPanel'
 
 type Props = { 
   jobs: Job[]; 
