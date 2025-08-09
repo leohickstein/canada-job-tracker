@@ -1,2 +1,0 @@
-export function csvEscape(s:any){ if(s==null) return ''; const str=String(s); return /[",\r\n]|[^\x00-\x7F]/.test(str)? '"'+str.replace(/"/g,'""')+'"': str }
-export function exportAppliedCSV(rows: Array<string[]>, filename='applied.csv'){ const csv = rows.map(r => r.map(csvEscape).join(',')).join('\n'); const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href) }
