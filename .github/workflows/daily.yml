@@ -47,4 +47,6 @@ jobs:
       #     html_body: "<h3>Novas vagas publicadas hoje</h3><p>Confere no site.</p>"
       - name: Send email digest (optional)
         if: ${{ env.SMTP_SERVER != '' }}
-        run: node scripts/send_email.js
+        run: |
+          npm install dotenv nodemailer
+          node scripts/send_email.js
