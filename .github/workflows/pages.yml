@@ -44,10 +44,25 @@ jobs:
       
       - name: Copy build output to website folder
         run: |
+          # Preserve fresh jobs data from git before clearing website/
+          mkdir -p /tmp/fresh-data
+          if [ -f website/data/jobs.json ]; then
+            cp website/data/jobs.json /tmp/fresh-data/
+            echo "✅ Found fresh jobs data in repository"
+          else
+            echo "⚠️  No jobs data found in repository"
+          fi
+          
+          # Copy React build output
           rm -rf website/*
           cp -r website-react/dist/* website/
-          # If using build folder instead of dist:
-          # cp -r website-react/build/* website/
+          
+          # Restore fresh jobs data from git
+          if [ -f /tmp/fresh-data/jobs.json ]; then
+            mkdir -p website/data
+            cp /tmp/fresh-data/jobs.json website/data/
+            echo "✅ Deployed fresh jobs data"
+          fi
       
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
