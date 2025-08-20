@@ -6,4 +6,8 @@ export default defineConfig(({ command }) => ({
   plugins: [react()],
   base: command === 'build' ? '/canada-job-tracker/' : '/',
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+  server: {
+    host: '0.0.0.0', // Listen on all interfaces
+    port: 5173,
+  },
 }))

@@ -1,10 +1,9 @@
 import React, { useMemo } from 'react'
 import type { Job, PersistState } from '@/types/job'
-import { text } from '@/utils/text'
-import { timeAgo } from '@/utils/time'
-import { Bookmark, Building2, MapPin, Clock, Sparkles } from 'lucide-react'
+import { Bookmark, Sparkles } from 'lucide-react'
+import { JobCard } from '@/ui/components/JobCard'
 
-export function SavedPage({ jobs, state }:{jobs: Job[], state: PersistState}){
+export function SavedPage({ jobs, state, setState }:{jobs: Job[], state: PersistState, setState?: (id: string, patch: any) => void}){
   const saved = useMemo(()=> jobs.filter(j => state.items[j.id]?.status === 'saved'), [jobs, state])
   
   return (
@@ -40,52 +39,15 @@ export function SavedPage({ jobs, state }:{jobs: Job[], state: PersistState}){
       )}
 
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3'>
-        {saved.map((j, index) => (
-          <div key={j.id} className="group relative overflow-hidden rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-            {/* Gradient overlay */}
-            <div className={`absolute inset-0 pointer-events-none ${
-              index % 3 === 0 ? 'bg-gradient-to-br from-blue-50/50 via-transparent to-purple-50/30 dark:from-blue-950/20 dark:via-transparent dark:to-purple-950/20' :
-              index % 3 === 1 ? 'bg-gradient-to-br from-emerald-50/50 via-transparent to-teal-50/30 dark:from-emerald-950/20 dark:via-transparent dark:to-teal-950/20' :
-              'bg-gradient-to-br from-rose-50/50 via-transparent to-pink-50/30 dark:from-rose-950/20 dark:via-transparent dark:to-pink-950/20'
-            }`} />
-            
-            <div className="relative p-5">
-              {/* Status badge */}
-              <div className="flex items-center justify-between mb-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-2 border-white/60 dark:border-slate-700/60 shadow-sm">
-                  <Bookmark className="h-3 w-3" fill="currentColor" />
-                  Saved
-                </span>
-              </div>
-
-              {/* Title */}
-              <h3 className='mb-3 font-semibold text-slate-900 dark:text-white leading-snug'>
-                {text(j.title)}
-              </h3>
-
-              {/* Meta info */}
-              <div className='space-y-2 text-sm'>
-                {text(j.company) && (
-                  <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                    <Building2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="font-medium">{text(j.company)}</span>
-                  </div>
-                )}
-                {text(j.location) && (
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <MapPin className="h-4 w-4 text-rose-500 flex-shrink-0" />
-                    <span>{text(j.location)}</span>
-                  </div>
-                )}
-                {j.created && (
-                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-500">
-                    <Clock className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                    <span>{timeAgo(j.created)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+        {saved.map((job) => (
+          <JobCard 
+            key={job.id}
+            job={job}
+            persist={state.items[job.id]}
+            onSave={() => setState?.(job.id, { status: undefined })}
+            onNotes={(notes) => setState?.(job.id, { notes })}
+            onTrack={(tracked) => setState?.(job.id, { tracked })}
+          />
         ))}
       </div>
     </main>

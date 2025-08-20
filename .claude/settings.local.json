@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(git rm:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run:*)",
+      "WebFetch(domain:developer.adzuna.com)",
+      "WebSearch",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

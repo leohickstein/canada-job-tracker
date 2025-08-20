@@ -5,15 +5,126 @@ import path from 'path';
 
 const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID;
 const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
 const WORKBC_BASE_URL = process.env.WORKBC_BASE_URL || '';
 const WORKBC_API_KEY = process.env.WORKBC_API_KEY || '';
 
-// Load watchlists
-const watchlists = JSON.parse(fs.readFileSync('config/watchlists.json', 'utf-8'));
-
 // Utility: wait
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// Fetch user preferences from Supabase
+async function fetchUserPreferences() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.log('⚠️  Supabase credentials missing - using default job search');
+    // Fallback to a basic set of popular job titles
+    return {
+      watchlists: [
+        {
+          name: "Popular Tech Roles",
+          synonyms: ["Software Engineer", "Developer", "Product Manager", "Data Scientist", "UX Designer"]
+        }
+      ],
+      regions: [
+        { name: "Remote-Canada", type: "remote", where: "Canada" },
+        { name: "British Columbia", type: "onsite", where: "British Columbia" },
+        { name: "Ontario", type: "onsite", where: "Ontario" }
+      ]
+    };
+  }
+
+  try {
+    console.log('🔍 Fetching user preferences from Supabase...');
+    
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/user_job_interests?select=*`, {
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Supabase API error: ${response.status} ${response.statusText}`);
+    }
+
+    const userInterests = await response.json();
+    console.log(`✅ Found ${userInterests.length} user preference profiles`);
+
+    if (userInterests.length === 0) {
+      console.log('📋 No user preferences found, using default search terms');
+      return {
+        watchlists: [
+          {
+            name: "Default Search",
+            synonyms: ["Software Engineer", "Product Manager", "Data Scientist", "UX Designer", "Marketing Manager"]
+          }
+        ],
+        regions: [
+          { name: "Remote-Canada", type: "remote", where: "Canada" },
+          { name: "British Columbia", type: "onsite", where: "British Columbia" },
+          { name: "Ontario", type: "onsite", where: "Ontario" }
+        ]
+      };
+    }
+
+    // Aggregate all unique job titles and locations from all users
+    const allJobTitles = new Set();
+    const allLocations = new Set();
+
+    userInterests.forEach(interest => {
+      // Add job titles
+      if (interest.job_titles && Array.isArray(interest.job_titles)) {
+        interest.job_titles.forEach(title => allJobTitles.add(title));
+      }
+      
+      // Add locations
+      if (interest.locations && Array.isArray(interest.locations)) {
+        interest.locations.forEach(location => allLocations.add(location));
+      }
+    });
+
+    // Convert to watchlist format
+    const watchlists = [{
+      name: "User Defined Roles",
+      synonyms: Array.from(allJobTitles)
+    }];
+
+    // Convert locations to regions format
+    const regions = Array.from(allLocations).map(location => {
+      const isRemote = location.toLowerCase().includes('remote') || location.toLowerCase().includes('hybrid');
+      return {
+        name: location,
+        type: isRemote ? 'remote' : 'onsite',
+        where: location === 'Remote' ? 'Canada' : location
+      };
+    });
+
+    console.log(`📋 Aggregated preferences: ${allJobTitles.size} job titles, ${allLocations.size} locations`);
+    console.log(`🎯 Job titles: ${Array.from(allJobTitles).join(', ')}`);
+    console.log(`📍 Locations: ${Array.from(allLocations).join(', ')}`);
+
+    return { watchlists, regions };
+
+  } catch (error) {
+    console.error('❌ Failed to fetch user preferences:', error.message);
+    console.log('🔄 Falling back to default job search...');
+    
+    return {
+      watchlists: [
+        {
+          name: "Fallback Search",
+          synonyms: ["Software Engineer", "Product Manager", "Data Scientist"]
+        }
+      ],
+      regions: [
+        { name: "Remote-Canada", type: "remote", where: "Canada" },
+        { name: "British Columbia", type: "onsite", where: "British Columbia" }
+      ]
+    };
+  }
+}
 
 // Normalize record
 function normalizeJob({ source, raw, roleMatched, region }) {
@@ -111,15 +222,20 @@ async function workbcFetch({ synonym, region }) {
 // Main
 async function main() {
   console.log('🚀 Starting job fetch process...');
-  console.log(`📋 Processing ${watchlists.watchlists.length} watchlists × ${watchlists.regions.length} regions`);
+  
+  // Fetch dynamic user preferences instead of hardcoded watchlists
+  const userPreferences = await fetchUserPreferences();
+  const { watchlists, regions } = userPreferences;
+  
+  console.log(`📋 Processing ${watchlists.length} watchlists × ${regions.length} regions`);
   
   const all = [];
   let totalFetched = 0;
   
-  for (const wl of watchlists.watchlists) {
+  for (const wl of watchlists) {
     console.log(`\n📄 Processing watchlist: ${wl.name} (${wl.synonyms.length} synonyms)`);
     
-    for (const region of watchlists.regions) {
+    for (const region of regions) {
       console.log(`\n🌍 Region: ${region.name} (${region.type})`);
       
       for (const syn of wl.synonyms) {

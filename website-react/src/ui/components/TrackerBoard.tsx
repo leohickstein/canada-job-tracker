@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import type { ColumnKey, Job, PersistState } from '@/types/job'
 import { text } from '@/utils/text'
 import { timeAgo } from '@/utils/time'
-import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core'
+import { DndContext, DragEndEvent, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors, useDroppable, DragOverlay } from '@dnd-kit/core'
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Clock, Building2, MapPin, Plus, GripVertical } from 'lucide-react'
@@ -25,6 +25,8 @@ type Props = {
 }
 
 export function TrackerBoard({ jobs, state, onMove, onReorder, q='', hideDone=false }: Props){
+  const [activeId, setActiveId] = useState<string | null>(null)
+
   // Visible jobs are the tracked ones or any with progressed status
   const visibleJobs = useMemo(()=>{
     const out: Job[] = []
@@ -63,7 +65,12 @@ export function TrackerBoard({ jobs, state, onMove, onReorder, q='', hideDone=fa
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor))
 
+  const handleDragStart = (e: DragStartEvent) => {
+    setActiveId(String(e.active.id))
+  }
+
   const handleDragEnd = (e: DragEndEvent) => {
+    setActiveId(null) // Clear active item
     const id = String(e.active.id)
     const overId = e.over?.id ? String(e.over.id) : null
     if (!overId) return
@@ -89,13 +96,24 @@ export function TrackerBoard({ jobs, state, onMove, onReorder, q='', hideDone=fa
     }
   }
 
+  // Get the active job for drag overlay
+  const activeJob = activeId ? visibleJobs.find(job => job.id === activeId) : null
+
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className='grid gap-4 md:grid-cols-5 auto-rows-max'>
         {COLS.map(c => (
           <Column key={c.key} column={c} items={lists[c.key]} jobs={visibleJobs} />
         ))}
       </div>
+      
+      <DragOverlay>
+        {activeJob ? (
+          <div className="rotate-2 opacity-95 scale-105">
+            <DragCard job={activeJob} />
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   )
 }
@@ -199,6 +217,49 @@ function DraggableCard({ id, job }:{ id: string, job: Job }){
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+// Drag overlay card component (similar to DraggableCard but without drag listeners)
+function DragCard({ job }: { job: Job }) {
+  return (
+    <div className="group relative overflow-hidden rounded-xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-2 border-blue-500/50 p-4 shadow-xl min-w-64 max-w-80">
+      {/* Drag handle */}
+      <div className="absolute top-2 right-2">
+        <GripVertical className="h-4 w-4 text-blue-500" />
+      </div>
+      
+      {/* Content */}
+      <div className="pr-6">
+        <h4 className='mb-2 font-medium text-slate-900 dark:text-white leading-snug line-clamp-2'>
+          {text(job.title)}
+        </h4>
+        
+        <div className='space-y-1.5 text-xs'>
+          {text(job.company) && (
+            <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+              <Building2 className="h-3 w-3 text-blue-500 flex-shrink-0" />
+              <span className="truncate font-medium">{text(job.company)}</span>
+            </div>
+          )}
+          {text(job.location) && (
+            <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+              <MapPin className="h-3 w-3 text-rose-500 flex-shrink-0" />
+              <span className="truncate">{text(job.location)}</span>
+            </div>
+          )}
+          {job.created && (
+            <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-500">
+              <Clock className="h-3 w-3 text-amber-500 flex-shrink-0" />
+              <span>{timeAgo(job.created)}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Visual indicator that this is being dragged */}
+      <div className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
     </div>
   )
 }
