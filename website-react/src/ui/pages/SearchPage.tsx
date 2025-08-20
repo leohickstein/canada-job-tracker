@@ -160,8 +160,7 @@ export function SearchPage({
               </h1>
             </div>
             <p className="text-slate-600 dark:text-slate-400">
-              Discover your next opportunity from thousands of remote and local
-              positions.
+              Discover your next opportunity from thousands of Canadian job opportunities.
             </p>
 
             {/* Quick stats - more compact */}
