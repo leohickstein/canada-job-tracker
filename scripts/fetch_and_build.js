@@ -233,19 +233,36 @@ async function workbcFetch({ synonym, region }) {
 async function main() {
   console.log('🚀 Starting job fetch process...');
   
-  // Fetch dynamic user preferences instead of hardcoded watchlists
-  const userPreferences = await fetchUserPreferences();
-  const { watchlists, regions } = userPreferences;
+  // Always fetch popular jobs for guest users first
+  const guestPreferences = {
+    watchlists: [
+      {
+        name: "Popular Jobs Feed (Guest)",
+        synonyms: [
+          "Software Engineer", "Product Manager", "Data Scientist", "UX Designer", 
+          "Marketing Manager", "Business Analyst", "Project Manager", "Sales Manager",
+          "DevOps Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer"
+        ]
+      }
+    ],
+    regions: [
+      { name: "Remote-Canada", type: "remote", where: "Canada" },
+      { name: "Toronto-ON", type: "onsite", where: "Toronto, ON" },
+      { name: "Vancouver-BC", type: "onsite", where: "Vancouver, BC" },
+      { name: "Montreal-QC", type: "onsite", where: "Montreal, QC" }
+    ]
+  };
   
-  console.log(`📋 Processing ${watchlists.length} watchlists × ${regions.length} regions`);
+  console.log(`📋 Processing ${guestPreferences.watchlists.length} guest watchlists × ${guestPreferences.regions.length} regions`);
+  console.log(`🎯 Guest job titles: ${guestPreferences.watchlists[0].synonyms.join(', ')}`);
   
   const all = [];
   let totalFetched = 0;
   
-  for (const wl of watchlists) {
+  for (const wl of guestPreferences.watchlists) {
     console.log(`\n📄 Processing watchlist: ${wl.name} (${wl.synonyms.length} synonyms)`);
     
-    for (const region of regions) {
+    for (const region of guestPreferences.regions) {
       console.log(`\n🌍 Region: ${region.name} (${region.type})`);
       
       for (const syn of wl.synonyms) {
