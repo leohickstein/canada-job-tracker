@@ -38,6 +38,10 @@ jobs:
           npm ci
       
       - name: Build React app
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          VITE_JOBS_URL: https://leohickstein.github.io/canada-job-tracker/data/jobs.json
         run: |
           cd website-react
           npm run build
