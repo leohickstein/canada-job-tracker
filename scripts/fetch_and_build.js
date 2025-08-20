@@ -17,19 +17,24 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 // Fetch user preferences from Supabase
 async function fetchUserPreferences() {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.log('⚠️  Supabase credentials missing - using default job search');
-    // Fallback to a basic set of popular job titles
+    console.log('⚠️  Supabase credentials missing - using popular job feed');
+    // Fallback with diverse, popular job titles for broad appeal
     return {
       watchlists: [
         {
-          name: "Popular Tech Roles",
-          synonyms: ["Software Engineer", "Developer", "Product Manager", "Data Scientist", "UX Designer"]
+          name: "Popular Jobs Feed",
+          synonyms: [
+            "Software Engineer", "Product Manager", "Data Scientist", "UX Designer", 
+            "Marketing Manager", "Business Analyst", "Project Manager", "Sales Manager",
+            "DevOps Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer"
+          ]
         }
       ],
       regions: [
         { name: "Remote-Canada", type: "remote", where: "Canada" },
-        { name: "British Columbia", type: "onsite", where: "British Columbia" },
-        { name: "Ontario", type: "onsite", where: "Ontario" }
+        { name: "Toronto-ON", type: "onsite", where: "Toronto, ON" },
+        { name: "Vancouver-BC", type: "onsite", where: "Vancouver, BC" },
+        { name: "Montreal-QC", type: "onsite", where: "Montreal, QC" }
       ]
     };
   }
@@ -53,18 +58,23 @@ async function fetchUserPreferences() {
     console.log(`✅ Found ${userInterests.length} user preference profiles`);
 
     if (userInterests.length === 0) {
-      console.log('📋 No user preferences found, using default search terms');
+      console.log('📋 No user preferences found, using popular job feed for non-authenticated users');
       return {
         watchlists: [
           {
-            name: "Default Search",
-            synonyms: ["Software Engineer", "Product Manager", "Data Scientist", "UX Designer", "Marketing Manager"]
+            name: "Popular Jobs Feed",
+            synonyms: [
+              "Software Engineer", "Product Manager", "Data Scientist", "UX Designer", 
+              "Marketing Manager", "Business Analyst", "Project Manager", "Sales Manager",
+              "DevOps Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer"
+            ]
           }
         ],
         regions: [
           { name: "Remote-Canada", type: "remote", where: "Canada" },
-          { name: "British Columbia", type: "onsite", where: "British Columbia" },
-          { name: "Ontario", type: "onsite", where: "Ontario" }
+          { name: "Toronto-ON", type: "onsite", where: "Toronto, ON" },
+          { name: "Vancouver-BC", type: "onsite", where: "Vancouver, BC" },
+          { name: "Montreal-QC", type: "onsite", where: "Montreal, QC" }
         ]
       };
     }
