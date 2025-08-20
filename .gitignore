@@ -18,7 +18,9 @@ coverage/
 
 # --- Env / secrets ---
 .env
+.env.local
 .env.*.local
+**/.env.local
 
 # --- OS / editors ---
 .DS_Store
@@ -38,3 +40,5 @@ website-react/public/data/*
 # --- Misc dumps ---
 *.zip
 *.patch
+.claude/settings.local.json
+.env.local
